@@ -1,5 +1,3 @@
-require 'lib/draco'
-
 require 'app/input'
 require 'app/sprite'
 require 'app/util'
@@ -16,9 +14,6 @@ require 'app/scenes/gameplay'
 require 'app/scenes/main_menu'
 require 'app/scenes/paused'
 require 'app/scenes/settings'
-
-# Entities
-require 'app/entities/player'
 
 require 'lib/tilemap'
 
