@@ -1,7 +1,8 @@
-# Remove the pound sign and leading space for the properties below before publishing your game.
-# devid=myname
-# devtitle=My Name
-# gameid=mygame
-# gametitle=My Game
-# version=0.1
-# icon=metadata/icon.png
+devid=kc00l
+devtitle=Andrea D'Amico
+gameid=likearogue
+gametitle=Like a Rogue
+version=0.1
+#icon=metadata/icon.png
+orientation=landscape
+scale_quality=0
