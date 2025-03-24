@@ -3,7 +3,7 @@ require 'pathname'
 
 APP_ROOT = Pathname.new('mygame').freeze
 
-guard :shell do
+guard :shell, all_on_start: true, cli: '--color' do
   watch(/^[^#]*\.rb/) { |m|
     if run_all?(m)
       run_all
@@ -21,7 +21,7 @@ def run_all?(match)
 end
 
 def run_all
-  run_dragonruby_tests(APP_ROOT / 'tests/main.rb')
+  run_dragonruby_tests(APP_ROOT / 'tests.rb')
 end
 
 def add_test_directory_to_path(path)
@@ -30,7 +30,8 @@ def add_test_directory_to_path(path)
 end
 
 def run_dragonruby_tests(path)
-  envs = 'SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy'
   relative_test_path = Pathname.new(path).relative_path_from(APP_ROOT)
-  system "#{envs} ./dragonruby #{APP_ROOT} --test #{relative_test_path}"
+  command = "./dragonruby #{APP_ROOT} --test #{relative_test_path}"
+  puts command
+  system(command)
 end
