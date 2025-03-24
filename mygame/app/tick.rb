@@ -3,13 +3,6 @@ def init(args)
   reset_swipe(args)
   GameSetting.load_settings(args)
   args.state.scene_switch_tick ||= 0
-
-  # entity_store = EntityStore.new component_definitions: default_component_definitions
-  # $game = Game.new(entity_store: entity_store)
-  # $game.player_entity = $game.create_entity :player
-  # map = $game.create_entity :map, cells: Array.new(40) { Array.new(23) }
-  # $game.transport_player_to map, x: 20, y: 12
-  # $scene = Scenes::Gameplay.new(game: $game)
 end
 
 def tick(args)
@@ -91,26 +84,3 @@ end
 def draw_bg_sprite(args, bg_sprite)
   args.outputs.sprites << { x: args.grid.left, y: args.grid.bottom, w: args.grid.w, h: args.grid.h }.merge(bg_sprite)
 end
-
-# def process_inputs(gtk_inputs)
-#   key_down = gtk_inputs.keyboard.key_down
-#   input_actions = {}
-#   if key_down.left
-#     input_actions[:move] = { x: -1, y: 0 }
-#   elsif key_down.right
-#     input_actions[:move] = { x: 1, y: 0 }
-#   elsif key_down.down
-#     input_actions[:move] = { x: 0, y: -1 }
-#   elsif key_down.up
-#     input_actions[:move] = { x: 0, y: 1 }
-#   end
-#   input_actions
-# end
-
-# def render(args)
-#   args.outputs.background_color = [0, 0, 0]
-#   args.outputs.primitives << $scene.sprites
-#   return if $gtk.production
-
-#   args.outputs.primitives << { x: 0, y: 720, text: $gtk.current_framerate.to_i.to_s, r: 255, g: 255, b: 255 }.label!
-# end
