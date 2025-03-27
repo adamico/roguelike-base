@@ -5,9 +5,24 @@ module Scene
     def tick_skill_tree(_args)
       setup
       render
+      move_cursor
+      move_with_mouse
+      handle_zoom
     end
 
     def setup
+      args.state.world.w ||= 1280
+      args.state.world.h ||= 720
+
+      args.state.camera.x                ||= 640
+      args.state.camera.y                ||= 300
+      args.state.camera.scale            ||= 1.0
+      args.state.camera.show_empty_space ||= :yes
+
+      args.state.cursor.x ||= 640
+      args.state.cursor.y ||= 300
+      args.state.cursor.size ||= 32
+
       state.graphic_nodes = []
       state.lines = []
 
@@ -37,10 +52,103 @@ module Scene
 
     def render
       draw_bg(args, BLACK)
-      args.outputs.primitives << state.lines.map(&:render)
-      args.outputs.primitives << state.graphic_nodes.map(&:render)
+      render_ui
+      render_scene
+      render_camera
+    end
+
+    def render_ui
+      args.outputs.primitives << { x: 0, y:  80.from_top, w: 360, h: 80, r: 0, g: 0, b: 0, a: 128 }.solid!
+      args.outputs.primitives << { x: 10, y: 10.from_top, text: "arrow keys to move around", r: 255, g: 255, b: 255}.label!
+      args.outputs.primitives << { x: 10, y: 30.from_top, text: "+/- to change zoom of camera", r: 255, g: 255, b: 255}.label!
+      args.outputs.primitives << { x: 10, y: 50.from_top, text: "tab to change camera edge behavior", r: 255, g: 255, b: 255}.label!
+    end
+
+    def render_scene
+      args.outputs[:scene].w = args.state.world.w
+      args.outputs[:scene].h = args.state.world.h
+
+      args.outputs[:scene].primitives << state.lines.map(&:render)
+      args.outputs[:scene].primitives << state.graphic_nodes.map(&:render)
+    end
+
+    def render_camera
+      scene_position = calc_scene_position
+      args.outputs.sprites << {
+        x: scene_position.x,
+        y: scene_position.y,
+        w: scene_position.w,
+        h: scene_position.h,
+        path: :scene
+      }
+    end
+
+    def move_cursor
+      return unless args.inputs.directional_angle
+
+      args.state.cursor.x += args.inputs.directional_angle.vector_x * 5
+      args.state.cursor.y += args.inputs.directional_angle.vector_y * 5
+      args.state.cursor.x  = args.state.cursor.x.clamp(0, args.state.world.w - args.state.cursor.size)
+      args.state.cursor.y  = args.state.cursor.y.clamp(0, args.state.world.h - args.state.cursor.size)
+    end
+
+    def move_with_mouse
+      mouse = args.inputs.mouse
+      
+      return unless mouse.held
+
+      args.state.cursor.x -= mouse.relative_x
+      args.state.cursor.y -= mouse.relative_y
+    end
+
+    def handle_zoom
+      if args.inputs.keyboard.kp_plus && Kernel.tick_count.zmod?(3)
+        args.state.camera.scale += 0.05
+      elsif args.inputs.keyboard.kp_minus && Kernel.tick_count.zmod?(3)
+        args.state.camera.scale -= 0.05
+      elsif args.inputs.keyboard.key_down.tab
+        if args.state.camera.show_empty_space == :yes
+          args.state.camera.show_empty_space = :no
+        else
+          args.state.camera.show_empty_space = :yes
+        end
+      end
+
+      args.state.camera.scale = args.state.camera.scale.greater(0.1)
+    end
+
+    def calc_scene_position
+      result = {
+        x: args.state.camera.x - (args.state.cursor.x * args.state.camera.scale),
+        y: args.state.camera.y - (args.state.cursor.y * args.state.camera.scale),
+        w: args.state.world.w * args.state.camera.scale,
+        h: args.state.world.h * args.state.camera.scale,
+        scale: args.state.camera.scale
+      }
+
+      return result if args.state.camera.show_empty_space == :yes
+
+      if result.w < args.grid.w
+        result.merge!(x: (args.grid.w - result.w).half)
+      elsif (args.state.cursor.x * result.scale) < args.grid.w.half
+        result.merge!(x: 10)
+      elsif (result.x + result.w) < args.grid.w
+        result.merge!(x: - result.w + (args.grid.w - 10))
+      end
+
+      if result.h < args.grid.h
+        result.merge!(y: (args.grid.h - result.h).half)
+      elsif result.y > 10
+        result.merge!(y: 10)
+      elsif (result.y + result.h) < args.grid.h
+        result.merge!(y: - result.h + (args.grid.h - 10))
+      end
+
+      result
     end
   end
+
+
 
   class Tree
     attr_reader :nodes

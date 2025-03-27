@@ -3,7 +3,7 @@ def init(args)
   reset_swipe(args)
   GameSetting.load_settings(args)
   args.state.scene_switch_tick ||= 0
-  args.outputs.static_primitives << Layout.debug_primitives
+  # args.outputs.static_primitives << Layout.debug_primitives
 end
 
 def tick(args)
