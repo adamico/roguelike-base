@@ -3,6 +3,7 @@ def init(args)
   reset_swipe(args)
   GameSetting.load_settings(args)
   args.state.scene_switch_tick ||= 0
+  args.outputs.static_primitives << Layout.debug_primitives
 end
 
 def tick(args)
@@ -12,7 +13,7 @@ def tick(args)
   args.outputs.background_color = TRUE_BLACK.values
 
   args.state.has_focus ||= true
-  args.state.scene ||= :main_menu
+  args.state.scene ||= :skill_tree
 
   track_swipe(args) if mobile?
 

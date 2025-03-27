@@ -14,6 +14,7 @@ require 'app/scenes/gameplay'
 require 'app/scenes/main_menu'
 require 'app/scenes/paused'
 require 'app/scenes/settings'
+require 'app/scenes/skill_tree'
 
 require 'lib/tilemap'
 
