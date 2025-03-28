@@ -30,6 +30,7 @@ require 'app/entity_types'
 require 'app/game'
 require 'app/tileset'
 require 'app/world'
+require 'app/tree'
 
 # NOTE: add all requires above this
 
