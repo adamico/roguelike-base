@@ -16,8 +16,8 @@ module Scene
     def setup_world
       args.grid.origin_center!
       args.state.world ||= { w: 1280, h: 720 }
-      args.state.camera ||= { x: 0, y: 0, scale: 1.0 }
-      args.state.cursor ||= { x: 640, y: 300, size: 32 }
+      args.state.camera ||= { x: -(1280 / 2), y: -(720 / 2), scale: 1.0 }
+      args.state.cursor ||= { x: 0, y: 0, size: 32 }
     end
 
     def setup_tree
@@ -72,21 +72,23 @@ module Scene
     end
 
     def mouse_hovering(node)
+      offset = 8
+      size = 32
+      total = offset + size
       mouse = args.inputs.mouse
-      mouse.inside_rect?(rect_for(node))
-    end
-
-    def rect_for(node)
-      {
-        x: node.x, y: node.y,
-        w: node.x + (1280 / 24), h: node.y + (720 / 12)
-      }
+      mouse.inside_rect?(
+        {
+          x: (node.x * total) - (state.cursor.x * args.state.camera.scale),
+          y: (node.y * total) - (state.cursor.y * args.state.camera.scale),
+          w: size, h: size
+        }
+      )
     end
 
     def render
       draw_bg(args, BLACK)
       render_skill_tree_ui
-      # render_node_labels
+      render_node_labels
       render_scene
       render_camera
     end
@@ -98,18 +100,19 @@ module Scene
     def label_for(node, x, y)
       return unless node.crystal
 
-      offset_x = 8
-      offset_y = 8
+      offset_x = 16
+      offset_y = 16
       text = node.crystal
-      text_width = text.length
+      text_width = (text.length * 10) + (offset_x * 2)
+      text_height = offset_y * 4
       [
         {
-          x: x, y: y,
-          w: text_width + (offset_x * 2), h: offset_y * 4,
+          x: x, y: y - text_height,
+          w: text_width, h: text_height,
           r: 0, g: 0, b: 0, a: 222
         }.solid!,
         {
-          x: x + offset_x, y: y + offset_y,
+          x: x + offset_x, y: y - (text_height / 2) + (offset_y / 2),
           text: text,
           r: 255, g: 255, b: 255
         }.label!
@@ -154,8 +157,6 @@ module Scene
 
       args.state.cursor.x += args.inputs.directional_angle.vector_x * 5
       args.state.cursor.y += args.inputs.directional_angle.vector_y * 5
-      args.state.cursor.x = args.state.cursor.x.clamp(0, args.state.world.w - args.state.cursor.size)
-      args.state.cursor.y = args.state.cursor.y.clamp(0, args.state.world.h - args.state.cursor.size)
     end
 
     def move_with_mouse
@@ -174,9 +175,7 @@ module Scene
         args.state.camera.scale -= 0.05
       end
 
-      if args.inputs.mouse.wheel && Kernel.tick_count.zmod?(2)
-        args.state.camera.scale += 0.05 * args.inputs.mouse.wheel.y.to_f
-      end
+      args.state.camera.scale += 0.05 * args.inputs.mouse.wheel.y.to_f if args.inputs.mouse.wheel
 
       args.state.camera.scale = args.state.camera.scale.greater(0.1)
     end

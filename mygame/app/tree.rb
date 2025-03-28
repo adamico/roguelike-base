@@ -33,26 +33,14 @@ class Line
     @offset = 8
     @node1 = params.node1
     @node2 = params.node2
-    @rect1 = Geometry.rect_props(rect_for(@node1))
-    @rect2 = Geometry.rect_props(rect_for(@node2))
   end
 
   def render
+    offset = @size + @offset
     {
       x: (@node1.x * offset) + (@size / 2), y: (@node1.y * offset) + (@size / 2),
       x2: (@node2.x * offset) + (@size / 2), y2: (@node2.y * offset) + (@size / 2),
       r: 255, g: 255, b: 255, a: 255
     }
-  end
-
-  def rect_for(node)
-    {
-      x: offset * node.x, y: offset * node.y,
-      w: @size, h: @size
-    }
-  end
-
-  def offset
-    @offset + @size
   end
 end
