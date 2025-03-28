@@ -3,7 +3,7 @@ module Scene
     # This is your main entrypoint into the actual fun part of your game!
     def tick_gameplay(args)
       labels = []
-      setup
+      setup_gameplay
 
       handle_focus
 
@@ -15,10 +15,10 @@ module Scene
       player_action = player_action(process_inputs)
       game.perform_player_action(player_action) if player_action
 
-      render(labels)
+      render_gameplay(labels)
     end
 
-    def setup
+    def setup_gameplay
       state.entity_store ||= EntityStore.new(
         component_definitions: default_component_definitions
       )
@@ -62,7 +62,7 @@ module Scene
       end
     end
 
-    def render(labels)
+    def render_gameplay(labels)
       draw_bg(args, BLACK)
 
       render_ui(labels)
@@ -72,7 +72,7 @@ module Scene
     end
 
     def render_ui(labels)
-      #labels << label('GAMEPLAY', x: 40, y: args.grid.top - 40, size: SIZE_LG, font: FONT_BOLD)
+      # labels << label('GAMEPLAY', x: 40, y: args.grid.top - 40, size: SIZE_LG, font: FONT_BOLD)
       args.outputs.labels << labels
     end
 

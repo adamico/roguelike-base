@@ -1,5 +1,3 @@
-Origin = Struct.new(:x, :y)
-
 module Scene
   class << self
     def tick_skill_tree(_args)
@@ -16,47 +14,109 @@ module Scene
     end
 
     def setup_world
+      args.grid.origin_center!
       args.state.world ||= { w: 1280, h: 720 }
-      args.state.camera ||= { x: 640, y: 300, scale: 1.0 }
+      args.state.camera ||= { x: 0, y: 0, scale: 1.0 }
       args.state.cursor ||= { x: 640, y: 300, size: 32 }
     end
 
     def setup_tree
+      mouse = args.inputs.mouse
       state.graphic_nodes = []
-      state.lines = []
-
-      origin = Origin.new(11, 5)
-
-      state.tree = Tree.new(
-        [
-          { color: 'white', x: origin.x, y: origin.y, links: [1, 3, 4] },         # 0
-          { color: 'orange', x: origin.x - 1, y: origin.y - 1, links: [0, 2] },   # 1
-          { color: 'violet', x: origin.x - 1, y: origin.y - 2, links: [1] },      # 2
-          { color: 'blue', x: origin.x, y: origin.y - 1, links: [0] },            # 3
-          { color: 'red', x: origin.x + 1, y: origin.y - 1, links: [0] }          # 4
-        ]
-      )
+      state.rect_nodes = []
+      state.node_lines = []
+      state.node_labels = []
+      state.tree = create_tree
 
       tree = state.tree
+      offset = 8
+      size = 32
 
       tree.nodes.each_with_index do |node, index|
-        state.graphic_nodes << Node.new(index, node.x, node.y, node.color)
+        state.graphic_nodes << Node.new(
+          {
+            node_id: index,
+            x: (offset + size) * node.x, y: (offset + size) * node.y,
+            w: size, h: size,
+            color: node.color
+          }
+        )
+        state.rect_nodes << {
+          x: (offset + size) * node.x, y: (offset + size) * node.y,
+          w: size, h: size,
+          r: 255, g: 255, b: 255
+        }.solid!
         node.links.each do |linked_node_id|
-          state.lines << Line.new(
-            index, linked_node_id, tree.nodes
+          state.node_lines << Line.new(
+            {
+              node1: tree.nodes[index],
+              node2: tree.nodes[linked_node_id]
+            }
           )
         end
+
+        state.node_labels << label_for(node, mouse.x, mouse.y) if mouse_hovering(node)
       end
+    end
+
+    def create_tree
+      Tree.new(
+        [
+          { color: 'white', x: 0, y: 0, crystal: nil, links: [1, 3, 4] }, # 0
+          { color: 'orange', x: -1, y: 1, crystal: 'Mana Guard', links: [0, 2] }, # 1
+          { color: 'violet', x: -1, y: 2, crystal: 'Mana Sight', links: [1] },    # 2
+          { color: 'blue', x: 0, y: 1, crystal: 'Fae Bramble Bush', links: [0] }, # 3
+          { color: 'red', x: 1, y: 1, crystal: 'Storm', links: [0] } # 4
+        ]
+      )
+    end
+
+    def mouse_hovering(node)
+      mouse = args.inputs.mouse
+      mouse.inside_rect?(rect_for(node))
+    end
+
+    def rect_for(node)
+      {
+        x: node.x, y: node.y,
+        w: node.x + (1280 / 24), h: node.y + (720 / 12)
+      }
     end
 
     def render
       draw_bg(args, BLACK)
-      render_ui
+      render_skill_tree_ui
+      # render_node_labels
       render_scene
       render_camera
     end
 
-    def render_ui
+    def render_node_labels
+      args.outputs.primitives << state.node_labels
+    end
+
+    def label_for(node, x, y)
+      return unless node.crystal
+
+      offset_x = 8
+      offset_y = 8
+      text = node.crystal
+      text_width = text.length
+      [
+        {
+          x: x, y: y,
+          w: text_width + (offset_x * 2), h: offset_y * 4,
+          r: 0, g: 0, b: 0, a: 222
+        }.solid!,
+        {
+          x: x + offset_x, y: y + offset_y,
+          text: text,
+          r: 255, g: 255, b: 255
+        }.label!
+      ]
+    end
+
+    def render_skill_tree_ui
       args.outputs.primitives << {
         x: 0, y:  80.from_top,
         w: 360, h: 80,
@@ -64,7 +124,7 @@ module Scene
       }.solid!
       args.outputs.primitives << {
         x: 10, y: 10.from_top,
-        text: 'insert text for UI here',
+        text: 'Hello UI!',
         r: 255, g: 255, b: 255
       }.label!
     end
@@ -73,7 +133,8 @@ module Scene
       args.outputs[:scene].w = args.state.world.w
       args.outputs[:scene].h = args.state.world.h
 
-      args.outputs[:scene].primitives << state.lines.map(&:render)
+      # args.outputs[:scene].primitives << state.rect_nodes
+      args.outputs[:scene].primitives << state.node_lines.map(&:render)
       args.outputs[:scene].primitives << state.graphic_nodes.map(&:render)
     end
 
