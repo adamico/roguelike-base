@@ -37,7 +37,19 @@ def debug_tick(args)
     ALIGN_RIGHT
   )
 
-  if args.inputs.keyboard.key_down.zero
+  debug_label(
+    args, 24.from_right, 48.from_top,
+    "mouse x:#{args.inputs.mouse.x}/y:#{args.inputs.mouse.y}",
+    ALIGN_RIGHT
+  )
+
+  debug_label(
+    args, 24.from_right, 72.from_top,
+    "cursor x:#{args.state.cursor.x}/y:#{args.state.cursor.y}",
+    ALIGN_RIGHT
+  )
+
+  if args.inputs.keyboard.key_down.kp_zero
     play_sfx(args, :select)
     args.state.render_debug_details = !args.state.render_debug_details
   end
