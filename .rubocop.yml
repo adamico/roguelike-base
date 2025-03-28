@@ -1,7 +1,11 @@
 AllCops:
   NewCops: enable
   Exclude:
-    - mygame/lib/tilemap.rb
+    - 'mygame/lib/tilemap.rb'
+    - 'tmp/**/*'
+    - 'mygame-template/**/*'
+    - 'docs/**/*'
+    - 'samples/**/*'
 
 # --- Personal preferences ---
 Layout/LineLength:
@@ -59,4 +63,7 @@ Style/HashSyntax:
 
 # Not implemented in mruby
 Style/RandomWithOffset:
+  Enabled: false
+
+Metrics/ClassLength:
   Enabled: false
