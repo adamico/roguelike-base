@@ -36,10 +36,9 @@ class Line
   end
 
   def render
-    offset = @size + @offset
     {
-      x: (@node1.x * offset) + (@size / 2), y: (@node1.y * offset) + (@size / 2),
-      x2: (@node2.x * offset) + (@size / 2), y2: (@node2.y * offset) + (@size / 2),
+      x: @node1.x + (@size / 2), y: @node1.y + (@size / 2),
+      x2: @node2.x + (@size / 2), y2: @node2.y + (@size / 2),
       r: 255, g: 255, b: 255, a: 255
     }
   end

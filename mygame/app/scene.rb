@@ -13,25 +13,49 @@ module Scene
     # changed to so any data is cleared out
     # ex:
     #   Scene.switch(args, :gameplay)
-    def switch(args, scene, reset: false, return_to: nil)
-      args.state.scene_to_return_to = return_to if return_to
-      args.state.scene_switch_tick = args.tick_count
+    def switch(scene, reset: false, return_to: nil)
+      state.scene_to_return_to = return_to if return_to
+      state.scene_switch_tick = args.tick_count
 
-      if scene == :back && args.state.scene_to_return_to
-        scene = args.state.scene_to_return_to
-        args.state.scene_to_return_to = nil
+      if scene == :back && state.scene_to_return_to
+        scene = state.scene_to_return_to
+        state.scene_to_return_to = nil
       end
 
       if reset
-        args.state.send(scene)&.current_option_i = nil
-        args.state.send(scene)&.hold_delay = nil
+        state.send(scene)&.current_option_i = nil
+        state.send(scene)&.hold_delay = nil
 
         # you can also add custom reset logic as-needed for specific scenes
         # here
       end
 
-      args.state.scene = scene
+      state.scene = scene
       raise FinishTick
+    end
+
+    def args
+      $gtk.args
+    end
+
+    def state
+      args.state
+    end
+
+    def inputs
+      args.inputs
+    end
+
+    def mouse
+      inputs.mouse
+    end
+
+    def outputs
+      args.outputs
+    end
+
+    def grid
+      args.grid
     end
   end
 end

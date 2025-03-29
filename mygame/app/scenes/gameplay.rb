@@ -143,14 +143,6 @@ module Scene
       state.tileset
     end
 
-    def args
-      $gtk.args
-    end
-
-    def state
-      args.state
-    end
-
     private
 
     def player_action(input_actions)
